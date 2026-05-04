@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FastMoney Ideas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0a14;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;}
+input,button{font-family:inherit;}
+input::placeholder{color:#2a2a40;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:#1a1a2e;border-radius:2px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.anim{animation:fadeUp .3s ease;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #1a1a30;border-top-color:#00ff88;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+.glass{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:14px;backdrop-filter:blur(8px);}
+.tag{border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;display:inline-block;}
+.tg{background:rgba(0,255,136,.13);color:#00ff88;border:1px solid rgba(0,255,136,.27);}
+.tb{background:rgba(0,153,255,.13);color:#0099ff;border:1px solid rgba(0,153,255,.27);}
+.tp{background:rgba(170,119,255,.13);color:#aa77ff;border:1px solid rgba(170,119,255,.27);}
+.to{background:rgba(255,153,102,.13);color:#ff9966;border:1px solid rgba(255,153,102,.27);}
+.ty{background:rgba(255,215,0,.13);color:#ffd700;border:1px solid rgba(255,215,0,.27);}
+.card{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:15px 17px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.card:hover{background:rgba(0,255,136,.05);border-color:rgba(0,255,136,.19);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,255,136,.09);}
+.card.done{border-color:rgba(0,255,136,.33);}
+.done-badge{position:absolute;top:9px;right:10px;background:#00ff88;color:#0a0a14;font-size:9px;font-weight:900;padding:2px 8px;border-radius:99px;}
+.gtext{background:linear-gradient(135deg,#00ff88,#0088ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.btn-main{width:100%;padding:15px;border-radius:12px;border:none;cursor:pointer;font-weight:900;font-size:15px;background:linear-gradient(135deg,#00ff88,#0088ff);color:#0a0a14;}
+.btn-main:disabled{background:#111127;color:#444;cursor:not-allowed;}
+.btn-back{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:#666;padding:7px 14px;cursor:pointer;font-size:12px;margin-bottom:20px;}
+.inp{width:100%;background:#0d0d20;border:1px solid #1e1e38;border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;outline:none;}
+.inp:focus{border-color:#333355;}
+#header{background:rgba(10,10,20,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04);padding:11px 16px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;}
+#body{max-width:580px;margin:0 auto;padding:16px 13px 96px;}
+#nav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,20,.98);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-around;padding:7px 0 15px;z-index:100;}
+.nbtn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;opacity:.3;transition:opacity .2s;}
+.nbtn.on{opacity:1;}
+.nbtn .ni{font-size:19px;}
+.nbtn.on .ni{filter:drop-shadow(0 0 6px rgba(0,255,136,.67));}
+.nl{font-size:9px;color:#444;font-weight:400;}
+.nbtn.on .nl{color:#00ff88;font-weight:800;}
+.fbtn{border-radius:99px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04);color:#666;}
+.fbtn.on{background:linear-gradient(135deg,#00ff88,#0088ff);border-color:transparent;color:#0a0a14;}
+.snum{background:linear-gradient(135deg,#0088ff,#00ff88);border-radius:50%;width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#0a0a14;margin-top:2px;}
+.lvlbadge{background:linear-gradient(135deg,#00ff88,#0088ff);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#0a0a14;flex-shrink:0;}
+.xpbg{background:#0d0d20;border-radius:99px;height:5px;overflow:hidden;}
+.xpfill{height:100%;background:linear-gradient(90deg,#00ff88,#0088ff);transition:width .7s ease;border-radius:99px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.stcard{padding:16px;text-align:center;}
+.stv{font-size:22px;font-weight:900;}
+.stl{font-size:11px;color:#555;margin-top:4px;}
+.bchart{display:flex;gap:6px;align-items:flex-end;height:90px;}
+.bwrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bar{width:100%;min-height:4px;border-radius:3px 3px 0 0;transition:height .5s ease;}
+.blbl{font-size:10px;color:#444;}
+.hrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px;}
+.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.secttitle{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.erbox{color:#ff6644;font-size:13px;margin-bottom:12px;padding:10px 14px;background:rgba(255,102,68,.08);border-radius:8px;border:1px solid rgba(255,102,68,.19);}
+.acard{border-radius:14px;margin-bottom:11px;cursor:pointer;}
+.banner{background:linear-gradient(135deg,rgba(0,255,136,.07),rgba(0,136,255,.07));border:1px solid rgba(0,255,136,.09);border-radius:14px;padding:16px 17px;margin-bottom:18px;display:flex;gap:14px;align-items:center;}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div class="gtext" style="font-size:16px;font-weight:900;">⚡ FastMoney Ideas</div>
+    <div style="font-size:9px;color:#2a2a40;letter-spacing:1.5px;text-transform:uppercase;">для подростков Казахстана</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:11px;">
+    <div style="text-align:right;">
+      <div id="h-income" style="font-size:13px;font-weight:800;color:#00ff88;">0₸</div>
+      <div style="font-size:9px;color:#333;">заработано</div>
+    </div>
+    <div class="lvlbadge" id="h-level">1</div>
+  </div>
+</div>
+
+<div id="body">
+
+  <!-- HOME -->
+  <div id="t-home" class="anim">
+    <div class="glass" style="padding:13px 16px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <div class="lvlbadge" id="xp-badge">1</div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#555;margin-bottom:4px;">
+            <span id="xp-lbl">Уровень 1</span><span id="xp-num">0/200 XP</span>
+          </div>
+          <div class="xpbg"><div class="xpfill" id="xp-bar" style="width:0%;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="banner">
+      <span style="font-size:40px;">💸</span>
+      <div>
+        <div style="font-weight:900;font-size:16px;margin-bottom:3px;">Заработай с нуля</div>
+        <div style="color:#555;font-size:12px;">20 реальных идей для подростков · Казахстан</div>
+      </div>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div style="color:#333;font-size:11px;margin-bottom:11px;" id="ideas-count"></div>
+    <div id="ideas-grid" style="display:grid;gap:9px;"></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="t-detail" style="display:none;" class="anim">
+    <button class="btn-back" onclick="closeDetail()">← Назад</button>
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:22px;">
+      <span id="d-emoji" style="font-size:50px;line-height:1;"></span>
+      <div>
+        <h1 id="d-title" style="font-size:22px;font-weight:900;margin:0 0 8px;"></h1>
+        <div id="d-tags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+    <div class="glass" style="padding:18px;margin-bottom:13px;"><p id="d-desc" style="color:#bbb;line-height:1.75;font-size:14px;"></p></div>
+    <div class="glass" style="padding:18px;margin-bottom:13px;border-color:rgba(0,136,255,.09);">
+      <div class="secttitle" style="color:#4da6ff;">📋 Пошаговый план</div>
+      <div id="d-steps"></div>
+    </div>
+    <div class="glass" style="padding:18px;margin-bottom:13px;border-color:rgba(255,102,68,.09);">
+      <div class="secttitle" style="color:#ff8866;">⚠️ Риски</div>
+      <div id="d-risks"></div>
+    </div>
+    <div class="glass" style="padding:18px;margin-bottom:20px;border-color:rgba(255,215,0,.09);">
+      <div class="secttitle" style="color:#ffd700;">✨ Реальный пример</div>
+      <p id="d-example" style="color:#ffe999;font-size:13px;line-height:1.7;font-style:italic;"></p>
+    </div>
+    <button id="d-done-btn" class="btn-main" style="margin-bottom:12px;" onclick="markDone()">✅ Отметить выполненным (+200 XP)</button>
+    <div id="d-done-msg" style="display:none;text-align:center;color:#00ff88;font-weight:800;margin-bottom:12px;">🎉 Ты выполнил эту идею!</div>
+    <div class="glass" style="padding:16px;">
+      <div style="color:#666;font-size:12px;margin-bottom:10px;">💸 Добавить заработок в трекер</div>
+      <div style="display:flex;gap:8px;">
+        <input class="inp" id="inc-inp" type="number" placeholder="Сумма в ₸" style="flex:1;"/>
+        <button onclick="addInc()" style="background:rgba(0,255,136,.09);border:1px solid rgba(0,255,136,.25);border-radius:8px;color:#00ff88;padding:10px 16px;cursor:pointer;font-weight:800;font-size:14px;">+ Добавить</button>
+      </div>
+      <div id="inc-ok" style="display:none;color:#00ff88;font-size:12px;margin-top:8px;">✓ Добавлено!</div>
+    </div>
+  </div>
+
+  <!-- AI -->
+  <div id="t-ai" style="display:none;" class="anim">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:44px;margin-bottom:8px;">🤖</div>
+      <h2 style="font-size:21px;font-weight:900;margin:0;">AI-Генератор идей</h2>
+      <p style="color:#555;font-size:13px;margin:8px 0 0;">Расскажи о себе — получи персональные идеи от Claude AI</p>
+    </div>
+    <div style="display:grid;gap:13px;margin-bottom:18px;">
+      <div>
+        <label style="display:block;color:#666;font-size:11px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Возраст</label>
+        <input class="inp" id="ai-age" type="number" placeholder="например: 16"/>
+      </div>
+      <div>
+        <label style="display:block;color:#666;font-size:11px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Город</label>
+        <input class="inp" id="ai-city" type="text" placeholder="например: Алматы, Шымкент, Астана"/>
+      </div>
+      <div>
+        <label style="display:block;color:#666;font-size:11px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Навыки и интересы</label>
+        <input class="inp" id="ai-skills" type="text" placeholder="например: монтаж видео, рисование, математика"/>
+      </div>
+      <div>
+        <label style="display:block;color:#666;font-size:11px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Свободных часов в день</label>
+        <input class="inp" id="ai-hours" type="number" placeholder="например: 3"/>
+      </div>
+    </div>
+    <div id="ai-err" class="erbox" style="display:none;"></div>
+    <button class="btn-main" id="ai-btn" onclick="runAI()">✨ Сгенерировать мои идеи</button>
+    <div id="ai-results" style="margin-top:26px;"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="t-progress" style="display:none;" class="anim">
+    <h2 style="font-size:19px;font-weight:900;margin-bottom:18px;">📈 Мой прогресс</h2>
+    <div class="g2" id="stats-g"></div>
+    <div class="glass" style="padding:18px;margin-bottom:14px;">
+      <div style="color:#aaa;font-size:12px;margin-bottom:14px;font-weight:700;">График заработка — 7 дней</div>
+      <div class="bchart" id="bchart"></div>
+    </div>
+    <div id="history-wrap" class="glass" style="padding:16px;">
+      <div style="color:#aaa;font-size:12px;margin-bottom:12px;font-weight:700;">История заработка</div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div id="t-achievements" style="display:none;" class="anim">
+    <h2 style="font-size:19px;font-weight:900;margin-bottom:18px;">🏆 Достижения</h2>
+    <div id="ach-g" style="display:grid;gap:10px;"></div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div id="t-community" style="display:none;" class="anim">
+    <h2 style="font-size:19px;font-weight:900;margin-bottom:4px;">👥 Сообщество</h2>
+    <p style="color:#444;font-size:13px;margin-bottom:20px;">Реальные истории тех, кто уже зарабатывает</p>
+    <div id="stories-g"></div>
+  </div>
+
+</div>
+
+<div id="nav">
+  <button class="nbtn on" id="nb-home" onclick="go('home')"><span class="ni">💡</span><span class="nl">Идеи</span></button>
+  <button class="nbtn" id="nb-ai" onclick="go('ai')"><span class="ni">🤖</span><span class="nl">AI</span></button>
+  <button class="nbtn" id="nb-progress" onclick="go('progress')"><span class="ni">📈</span><span class="nl">Прогресс</span></button>
+  <button class="nbtn" id="nb-achievements" onclick="go('achievements')"><span class="ni">🏆</span><span class="nl">Ачивки</span></button>
+  <button class="nbtn" id="nb-community" onclick="go('community')"><span class="ni">👥</span><span class="nl">Команда</span></button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const DB = [
+  {id:1,title:"Курьер на велосипеде",emoji:"🚲",cat:"offline",inv:"none",spd:"fast",age:14,inc:{a:3000,b:8000,p:"день"},dif:2,
+   desc:"Доставляй еду и посылки через Glovo, Яндекс.Еда или Chocofood. Первые деньги — уже в первый рабочий день.",
+   steps:["Скачай Glovo или Яндекс.Еда, зарегистрируйся курьером","Нужно согласие родителей до 18 лет — подпишут за 5 мин","Купи термосумку (~2,000₸) или возьми у сервиса","Работай в часы пик: обед 12–14, ужин 18–21","Выводи деньги ежедневно на Kaspi-карту"],
+   risks:["В дождь и мороз заказов меньше","Нужен исправный велосипед","Физически устаёшь в жару"],
+   ex:"Азамат, 16 лет, Алматы — 25,000–40,000₸ в неделю, 4–5 часов после школы."},
+  {id:2,title:"Монтаж видео",emoji:"🎬",cat:"online",inv:"none",spd:"medium",age:13,inc:{a:5000,b:50000,p:"проект"},dif:3,
+   desc:"Монтируй видео для TikTok-блогеров, кафе и бизнесов. Спрос огромный — все хотят контент, но мало кто умеет монтировать.",
+   steps:["Установи CapCut (телефон) или DaVinci Resolve (ПК) — бесплатно","Смонтируй 3 примера для портфолио","Создай гиг на Kwork.ru за 3,000–7,000₸","Напиши в 15–20 Telegram-каналов казахстанских блогеров","После 3+ отзывов подними цену до 20,000–50,000₸"],
+   risks:["Первые клиенты — 1–2 недели поиска","Нужен смартфон или ПК","Конкуренция на фрилансе"],
+   ex:"Дина, 15 лет, Астана — 3–4 видео в неделю, 60,000–80,000₸/мес."},
+  {id:3,title:"Репетитор для младших",emoji:"📚",cat:"offline",inv:"none",spd:"fast",age:14,inc:{a:2000,b:5000,p:"час"},dif:2,
+   desc:"Хорошо знаешь математику, физику или английский? Учи тех, кто помладше. Самый стабильный заработок для школьника.",
+   steps:["Выбери предмет, в котором реально силён (4–5)","Напиши пост в родительские WhatsApp/Telegram-чаты школы","Установи стартовую цену 1,500–2,500₸/час","Проведи первые 2–3 занятия, попроси отзыв","После 5 отзывов подними цену до 4,000–5,000₸/час"],
+   risks:["Нужно реально хорошо знать предмет","Ученики иногда отменяют занятия","Родители могут торговаться"],
+   ex:"Тимур, 17 лет — 5 учеников по математике, 90,000₸/мес, 2–3 часа в день."},
+  {id:4,title:"Хенд-мейд украшения",emoji:"🎨",cat:"offline",inv:"small",spd:"medium",age:13,inc:{a:500,b:8000,p:"изделие"},dif:2,
+   desc:"Делай и продавай украшения из бисера, слаймы, свечи или мыло. Казахстанский рынок хенд-мейда активно растёт.",
+   steps:["Выбери нишу: украшения из бисера, соевые свечи, мыло, слаймы","Закупи материалы на старт: 3,000–10,000₸ на Kaspi.kz","Сними красивые фото процесса на телефон","Создай Instagram и TikTok: выкладывай процесс + результат","Продавай через OLX.kz, Instagram DM и местные барахолки"],
+   risks:["Нужны стартовые вложения","Первый месяц продажи идут медленно","Конкуренция в популярных нишах"],
+   ex:"Айгерим, 15 лет, Шымкент — украшения из бисера, 45,000–70,000₸/мес."},
+  {id:5,title:"SMM для местного бизнеса",emoji:"📱",cat:"online",inv:"none",spd:"medium",age:14,inc:{a:15000,b:60000,p:"мес/клиент"},dif:3,
+   desc:"Кафе, барберы, салоны нуждаются в Instagram/TikTok, но не умеют вести. Стань их SMM-менеджером.",
+   steps:["Посмотри 5 YouTube-видео про основы SMM (2–3 часа)","Сделай 9 постов-примеров для воображаемого бизнеса","Зайди лично в 5–10 кафе/барберов рядом","Предложи 2 недели бесплатно за отзыв и кейс","После кейса бери 15,000–30,000₸/мес за аккаунт"],
+   risks:["Первый клиент — самый тяжёлый","Клиенты иногда платят с задержкой","Нужна хорошая камера смартфона"],
+   ex:"Нурлан, 17 лет — ведёт 3 аккаунта, 90,000₸/мес, учится в 11 классе."},
+  {id:6,title:"Перепродажа с OLX",emoji:"🛒",cat:"offline",inv:"small",spd:"fast",age:14,inc:{a:2000,b:20000,p:"сделка"},dif:2,
+   desc:"Покупай дёшево у тех, кто продаёт срочно, и перепродавай дороже на OLX.kz. Классика с минимальным стартом.",
+   steps:["Изучи цены на OLX: телефоны, одежда, электроника","Ищи объявления «срочно» — цена ниже рынка на 20–40%","Купи за 5,000₸, почисти и продай за 8,000–10,000₸","Реинвестируй прибыль — купи 2–3 вещи сразу","Специализируйся: телефоны и кроссовки — самый ходовой товар"],
+   risks:["Нужны стартовые деньги","Можно купить некачественный товар","Иногда продаётся медленно"],
+   ex:"Санжар, 16 лет — перепродаёт б/у телефоны, 50,000–80,000₸/мес."},
+  {id:7,title:"Копирайтинг и тексты",emoji:"✍️",cat:"online",inv:"none",spd:"medium",age:13,inc:{a:1000,b:15000,p:"статья"},dif:2,
+   desc:"Пиши тексты для сайтов, Instagram-постов и описания товаров. Начать можно без портфолио.",
+   steps:["Зарегистрируйся на Kwork.ru — создай гиг «напишу текст за 1,000₸»","Сделай 3 примера текстов: товар, статья, Instagram-пост","Напиши в казахстанские бизнес-чаты Telegram","Первые 10 заказов — любая цена ради отзывов","После 10 отзывов подними до 3,000–7,000₸ за текст"],
+   risks:["Высокая конкуренция на фрилансе","Первые заказы за мало денег","Нужна хорошая грамотность"],
+   ex:"Малика, 16 лет — пишет описания товаров, 40,000₸/мес, 2–3 часа в день."},
+  {id:8,title:"Мойка машин во дворе",emoji:"🚗",cat:"offline",inv:"small",spd:"fast",age:13,inc:{a:1500,b:5000,p:"машина"},dif:1,
+   desc:"Мой машины соседей прямо во дворе. Не нужна автомойка — только вода, тряпки и желание работать.",
+   steps:["Купи: ведро, губки, микрофибра, автошампунь — ~2,000–3,000₸","Помой машину родителей и сфотографируй результат","Напиши в домовой чат: «Помою машину — 2,000₸ во дворе»","Работай по выходным утром — тогда больше всего желающих","Добавь полировку за +1,000₸ — клиенты охотно берут"],
+   risks:["Зимой работать сложнее","Нужен доступ к воде","Сезонность"],
+   ex:"Ерлан, 14 лет, Алматы — 5–8 машин в выходной, 15,000–25,000₸ за уикенд."},
+  {id:9,title:"Дизайн в Canva",emoji:"🖼️",cat:"online",inv:"none",spd:"medium",age:13,inc:{a:2000,b:20000,p:"проект"},dif:2,
+   desc:"Делай логотипы, посты для Instagram, баннеры и визитки в Canva. Не нужен профессиональный дизайн — нужен вкус.",
+   steps:["Зарегистрируйся на Canva.com — бесплатно","Посмотри 2–3 видео «Canva для бизнеса» на YouTube","Сделай 5–10 работ: логотип, пост, баннер, визитка","Создай профиль на Kwork.ru за 2,000₸ за логотип","Напиши малым бизнесам напрямую через Instagram DM"],
+   risks:["Canva Pro платная (можно обойтись бесплатной)","Конкуренция с профессионалами","Клиенты часто просят правки"],
+   ex:"Жанна, 15 лет — логотипы и посты для кафе, 55,000₸/мес, 2–3 часа в день."},
+  {id:10,title:"Помощь пожилым с телефоном",emoji:"📞",cat:"offline",inv:"none",spd:"fast",age:13,inc:{a:1000,b:3000,p:"визит"},dif:1,
+   desc:"Помогай бабушкам и дедушкам разбираться с телефоном, Kaspi и приложениями. Спрос огромный, конкуренции ноль.",
+   steps:["Расскажи соседям и родственникам что помогаешь с телефонами","Установи прайс: 1,000₸ за выезд + час работы","Повесь объявление на подъезде: «Помогу с телефоном, недорого»","Расширь: ТВ-приставки, антивирус, восстановление данных","Постоянные клиенты будут рекомендовать друзьям"],
+   risks:["Нестабильный доход","Иногда нужно терпение","Проблемы бывают сложными"],
+   ex:"Асель, 14 лет — помогает 4–6 соседям в неделю, 20,000–30,000₸/мес."},
+  {id:11,title:"Перевод текстов",emoji:"🌐",cat:"online",inv:"none",spd:"medium",age:14,inc:{a:500,b:5000,p:"страница"},dif:2,
+   desc:"Знаешь казахский + русский или английский? Переводи тексты для бизнесов, документы и субтитры.",
+   steps:["Определи языковые пары: каз-рус, рус-англ или все три","Сделай 3–5 переводов-примеров из публичных текстов","Разместись на Kwork.ru: «Перевод текста — 500₸/страница»","Найди клиентов в Telegram-группах казахстанских предпринимателей","С опытом берись за технические и юридические тексты"],
+   risks:["Нужно реально хорошо знать язык","Работа может быть скучной","Конкуренция с профессионалами"],
+   ex:"Дастан, 17 лет — переводит документы, 60,000₸/мес, 2 часа в день."},
+  {id:12,title:"Продажа домашней выпечки",emoji:"🍰",cat:"offline",inv:"small",spd:"fast",age:13,inc:{a:500,b:8000,p:"изделие"},dif:2,
+   desc:"Пеки торты, чизкейки, самсу или брауни и продавай через Instagram. Домашняя выпечка ценится выше магазинной.",
+   steps:["Освой 2–3 рецепта, которые получаются стабильно хорошо","Красиво сфотографируй каждое изделие — фото продаёт само","Создай Instagram: «Домашняя выпечка [Город]»","Начни с предзаказов — берёшь деньги вперёд, покупаешь ингредиенты","Добавь доставку +500₸ за удобство"],
+   risks:["Нужны деньги на ингредиенты","Первые попытки могут не удаться","Срок годности ограничен"],
+   ex:"Лейла, 16 лет, Алматы — чизкейки и брауни, 70,000₸/мес через Instagram."},
+  {id:13,title:"Таргетированная реклама",emoji:"📣",cat:"online",inv:"small",spd:"medium",age:15,inc:{a:10000,b:40000,p:"мес/клиент"},dif:4,
+   desc:"Настраивай рекламу в Instagram для малого бизнеса. Один из самых высокооплачиваемых навыков среди подростков.",
+   steps:["Пройди бесплатный курс Meta Blueprint (на русском, официальный)","Настрой тестовую кампанию на 1,000–2,000₸ своих денег","Найди первого клиента: кафе или магазин — за 50% скидки","Сделай кейс: потратили X₸ → получили Y заявок","Продавай кейс следующим клиентам за 15,000–40,000₸/мес"],
+   risks:["Нужен бюджет на тест рекламы","Клиенты ждут быстрых результатов","Алгоритмы часто меняются"],
+   ex:"Адиль, 17 лет — ведёт рекламу для 3 бизнесов, 120,000₸/мес, полностью удалённо."},
+  {id:14,title:"Сайт-визитка на Tilda",emoji:"💻",cat:"online",inv:"none",spd:"medium",age:14,inc:{a:15000,b:80000,p:"проект"},dif:3,
+   desc:"Делай простые сайты для бизнесов на Tilda. Не нужен код — только научиться конструктору и продавать.",
+   steps:["Изучи Tilda.cc — бесплатный тариф + 3 часа на YouTube","Создай 2 демо-сайта: для кафе и для мастера","Напиши в 20 бизнес-чатов Telegram: «Сделаю сайт за 20,000₸»","Первый сайт — за 10,000₸ ради кейса","Добавь допуслуги: обновление контента +5,000₸/мес"],
+   risks:["Обучение займёт 1–2 недели","Клиенты просят нереальные правки","Tilda платная для коммерческих проектов"],
+   ex:"Алибек, 16 лет — сайты для ресторанов и салонов, 150,000₸/мес."},
+  {id:15,title:"Уход за питомцами",emoji:"🐾",cat:"offline",inv:"none",spd:"fast",age:13,inc:{a:2000,b:8000,p:"день"},dif:1,
+   desc:"Выгуливай собак и присматривай за питомцами. Казахстанцы всё больше заводят животных — спрос растёт.",
+   steps:["Расскажи всем соседям что занимаешься этим","Установи цены: выгул — 1,000₸/час, присмотр на день — 3,000–5,000₸","Напиши пост в домовой чат с фото питомца","Первые клиенты — со скидкой за отзыв","Расширь: стрижка когтей, купание — дополнительный доход"],
+   risks:["Животные бывают агрессивными","Нужна ответственность","Возможная аллергия на шерсть"],
+   ex:"Камила, 14 лет — выгуливает 4 собаки ежедневно, 35,000–45,000₸/мес."},
+  {id:16,title:"Продажа цифровых товаров",emoji:"💾",cat:"online",inv:"none",spd:"medium",age:13,inc:{a:500,b:10000,p:"продажа"},dif:3,
+   desc:"Создай шаблоны для Instagram, пресеты для фото или PDF-планнеры и продавай бесконечно одно и то же.",
+   steps:["Выбери нишу: пресеты Lightroom, шаблоны Canva, PDF-планнеры","Создай 5–10 продуктов в своей нише","Продавай на Gumroad.com (принимает карты со всего мира)","Продвигай через TikTok — контент про процесс создания","Один хит может продаваться годами без усилий"],
+   risks:["Первые продажи требуют времени","Нужно продвижение","Конкуренция в популярных нишах"],
+   ex:"Зарина, 16 лет — продаёт пресеты Lightroom и шаблоны Canva, 30,000–60,000₸/мес пассивно."},
+  {id:17,title:"Ведение TikTok для бизнеса",emoji:"🎵",cat:"online",inv:"none",spd:"medium",age:13,inc:{a:10000,b:50000,p:"мес/клиент"},dif:3,
+   desc:"TikTok сейчас горячее Instagram. Бизнесы хотят там быть, но не знают как снимать — ты можешь помочь.",
+   steps:["Изучи тренды TikTok в категории «бизнес» и «еда»","Сними 5 видео для воображаемого кафе как портфолио","Зайди в 10 местных заведений с предложением вести TikTok","Начни с 10,000₸/мес за 8–12 видео в месяц","С ростом аккаунта клиента повышай цену"],
+   risks:["Результаты непредсказуемы","Тренды меняются быстро","Нужна хорошая съёмка"],
+   ex:"Арман, 16 лет — ведёт TikTok для двух кафе в Алматы, 60,000₸/мес."},
+  {id:18,title:"Фотосъёмка на телефон",emoji:"📸",cat:"offline",inv:"none",spd:"fast",age:13,inc:{a:5000,b:30000,p:"съёмка"},dif:2,
+   desc:"Современные смартфоны снимают лучше многих камер. Снимай фото для меню ресторанов и магазинов.",
+   steps:["Изучи основы композиции и света (YouTube, 2–3 часа)","Сними 20–30 хороших фото для портфолио","Зайди в 5–10 кафе и магазинов с предложением снять меню","Начни с 5,000–10,000₸ за съёмку 20–30 фото","Добавь обработку в Lightroom Mobile — +2,000₸"],
+   risks:["Конкуренция с профессиональными фотографами","Нужен хороший смартфон","Заказы непостоянные"],
+   ex:"Данияр, 15 лет — снимает для кафе и магазинов одежды, 40,000–60,000₸/мес."},
+  {id:19,title:"Сдача вещей в аренду",emoji:"🎮",cat:"offline",inv:"none",spd:"fast",age:14,inc:{a:1000,b:5000,p:"день"},dif:1,
+   desc:"Сдавай в аренду приставки, самокат, велосипед или скейт посуточно. Пассивный доход из того, что уже есть.",
+   steps:["Сделай список того, что можно сдавать: приставка, самокат, велик","Оцени дневную ставку: 10–20% от рыночной цены предмета","Разместись в домовом чате и на OLX.kz","Бери залог в 2–3 раза дороже аренды — обязательно!","Расширяйся: купи б/у вещи специально для аренды"],
+   risks:["Вещи могут сломать или не вернуть","Нужен залог на случай поломки","Спрос нестабильный"],
+   ex:"Максат, 15 лет — сдаёт PS5 и самокат, зарабатывает 25,000–35,000₸/мес почти без усилий."},
+  {id:20,title:"Ноготочки и макияж на дому",emoji:"💅",cat:"offline",inv:"small",spd:"fast",age:14,inc:{a:2000,b:8000,p:"клиент"},dif:2,
+   desc:"Делай маникюр и лёгкий макияж подругам и соседкам на дому. Один из самых быстрых стартов.",
+   steps:["Купи стартовый набор: гель-лак, лампа, расходники — 5,000–15,000₸ на Kaspi","Потренируйся на подругах и родственницах бесплатно","Сфотографируй работы и создай Instagram «[Имя]_nails_[город]»","Установи цену: маникюр 2,000–4,000₸, с покрытием 3,000–6,000₸","Постоянные клиенты — стабильный ежемесячный доход"],
+   risks:["Нужны стартовые вложения","Обучение занимает время","Клиенты бывают требовательными"],
+   ex:"Акмарал, 16 лет, Алматы — 15–20 клиентов в месяц, 60,000–90,000₸, работает дома."}
+];
+
+const ACHS = [
+  {id:"first_idea",title:"Первый шаг",desc:"Открыл первую идею",emoji:"🌱",xp:50},
+  {id:"first_done",title:"Первый заработок",desc:"Отметил идею выполненной",emoji:"💰",xp:200},
+  {id:"income_10k",title:"10 000₸ клуб",desc:"Добавил 10,000₸ в трекер",emoji:"💎",xp:300},
+  {id:"five_ideas",title:"Исследователь",desc:"Открыл 5 разных идей",emoji:"🗺️",xp:100},
+  {id:"ai_used",title:"Умный пользователь",desc:"Использовал AI-генератор",emoji:"🤖",xp:75},
+  {id:"income_50k",title:"50 000₸",desc:"Добавил 50,000₸ в трекер",emoji:"🏆",xp:500},
+  {id:"ten_ideas",title:"Эксперт",desc:"Открыл 10 идей",emoji:"🎓",xp:200}
+];
+
+const STORIES = [
+  {n:"Азамат К.",c:"Алматы",i:"Курьер на велосипеде",e:38000,d:7,em:"🚲",t:"За первую неделю заработал 38,000₸! Работаю 4 часа после школы. Главное — пиковые часы."},
+  {n:"Дина М.",c:"Астана",i:"Монтаж видео",e:75000,d:30,em:"🎬",t:"Нашла 3 клиентов через Telegram за 2 недели. Теперь стабильно 75к в месяц, сижу дома."},
+  {n:"Тимур Б.",c:"Шымкент",i:"Репетитор",e:90000,d:60,em:"📚",t:"5 учеников по математике. Родители рекомендуют меня друг другу — клиентов уже слишком много!"},
+  {n:"Айгерим С.",c:"Алматы",i:"Хенд-мейд украшения",e:55000,d:45,em:"🎨",t:"Начала с вложением 5,000₸. Первый заказ пришёл за 3 дня после первого поста в Instagram."},
+  {n:"Лейла К.",c:"Алматы",i:"Домашняя выпечка",e:68000,d:30,em:"🍰",t:"TikTok с процессом готовки дал 150 подписчиков за неделю. Заказы идут нон-стоп."},
+  {n:"Акмарал Н.",c:"Алматы",i:"Ноготочки на дому",e:85000,d:30,em:"💅",t:"Начала с подруг бесплатно, теперь 18 постоянных клиентов. Запись на 2 недели вперёд!"}
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+
+function gl(k,d){try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}}
+function sl(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+const S = {
+  xp: gl('xp',0),
+  done: gl('done',[]),
+  income: gl('income',[]),
+  unlocked: gl('unlocked',[]),
+  viewed: gl('viewed',[]),
+  filter: gl('filter','all'),
+  tab: 'home',
+  idea: null
+};
+
+function save(k,v){S[k]=v;sl(k,v);}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+
+const fmt = n=>(n||0).toLocaleString('ru-KZ');
+const incStr = i=>`${fmt(i.inc.a)}–${fmt(i.inc.b)}₸/${i.inc.p}`;
+const difLbl = n=>['','Очень легко','Легко','Средне','Сложно','Хардкор'][n]||'—';
+const tag = (t,c)=>`<span class="tag ${c}">${t}</span>`;
+const totInc = ()=>S.income.reduce((a,b)=>a+b.amount,0);
+
+// ═══════════════════════════════════════════════════════
+// XP & ACHIEVEMENTS
+// ═══════════════════════════════════════════════════════
+
+function addXp(n){save('xp',S.xp+n);renderHeader();renderXpBar();}
+
+function unlock(id){
+  if(S.unlocked.includes(id))return;
+  const a=ACHS.find(x=>x.id===id);
+  save('unlocked',[...S.unlocked,id]);
+  if(a)addXp(a.xp);
+  if(S.tab==='achievements')renderAchs();
+}
+
+// ═══════════════════════════════════════════════════════
+// HEADER & XP BAR
+// ═══════════════════════════════════════════════════════
+
+function renderHeader(){
+  const lv=Math.floor(S.xp/200)+1;
+  document.getElementById('h-income').textContent=fmt(totInc())+'₸';
+  document.getElementById('h-level').textContent=lv;
+}
+
+function renderXpBar(){
+  const lv=Math.floor(S.xp/200)+1;
+  const pct=(S.xp%200)/200*100;
+  document.getElementById('xp-badge').textContent=lv;
+  document.getElementById('xp-lbl').textContent='Уровень '+lv;
+  document.getElementById('xp-num').textContent=(S.xp%200)+'/200 XP';
+  document.getElementById('xp-bar').style.width=pct+'%';
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+const TABS=['home','ai','progress','achievements','community'];
+
+function go(tab){
+  S.tab=tab; S.idea=null;
+  TABS.forEach(t=>{
+    const el=document.getElementById('t-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+    document.getElementById('nb-'+t).classList.toggle('on',t===tab);
+  });
+  document.getElementById('t-detail').style.display='none';
+  if(tab==='home'){renderFilters();renderIdeas();}
+  if(tab==='progress')renderProgress();
+  if(tab==='achievements')renderAchs();
+  if(tab==='community')renderCommunity();
+}
+
+// ═══════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════
+
+function renderFilters(){
+  const list=[
+    {id:'all',lb:'Все'},
+    {id:'online',lb:'🌐 Онлайн'},
+    {id:'offline',lb:'🏙 Офлайн'},
+    {id:'free',lb:'💸 Без вложений'},
+    {id:'fast',lb:'⚡ Быстрый старт'}
+  ];
+  document.getElementById('filters').innerHTML=list.map(f=>
+    `<button class="fbtn ${S.filter===f.id?'on':''}" onclick="setFilter('${f.id}')">${f.lb}</button>`
+  ).join('');
+}
+
+function setFilter(f){save('filter',f);renderFilters();renderIdeas();}
+
+function filtered(){
+  return DB.filter(i=>{
+    if(S.filter==='online')return i.cat==='online';
+    if(S.filter==='offline')return i.cat==='offline';
+    if(S.filter==='free')return i.inv==='none';
+    if(S.filter==='fast')return i.spd==='fast';
+    return true;
+  });
+}
+
+function renderIdeas(){
+  const list=filtered();
+  document.getElementById('ideas-count').textContent=list.length+' идей';
+  document.getElementById('ideas-grid').innerHTML=list.map(idea=>{
+    const done=S.done.includes(idea.id);
+    return `<div class="card ${done?'done':''}" onclick="openIdea(${idea.id})">
+      ${done?'<div class="done-badge">✓ ГОТОВО</div>':''}
+      <div style="display:flex;gap:13px;align-items:flex-start;">
+        <span style="font-size:32px;line-height:1;flex-shrink:0;margin-top:2px;">${idea.emoji}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:14px;margin-bottom:4px;line-height:1.3;">${idea.title}</div>
+          <div style="font-size:12px;color:#777;margin-bottom:9px;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${idea.desc}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${tag(incStr(idea),'tg')} ${tag(difLbl(idea.dif),'tb')} ${tag(idea.cat==='online'?'🌐 Онлайн':'🏙 Офлайн','tp')}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// DETAIL
+// ═══════════════════════════════════════════════════════
+
+function openIdea(id){
+  const idea=DB.find(i=>i.id===id);
+  if(!idea)return;
+  S.idea=idea;
+  unlock('first_idea');
+  if(!S.viewed.includes(id)){
+    const nxt=[...S.viewed,id];
+    save('viewed',nxt);
+    if(nxt.length>=5)unlock('five_ideas');
+    if(nxt.length>=10)unlock('ten_ideas');
+  }
+  // hide home, show detail
+  document.getElementById('t-home').style.display='none';
+  const dt=document.getElementById('t-detail');
+  dt.style.display='block';
+  dt.classList.remove('anim'); void dt.offsetWidth; dt.classList.add('anim');
+
+  document.getElementById('d-emoji').textContent=idea.emoji;
+  document.getElementById('d-title').textContent=idea.title;
+  document.getElementById('d-tags').innerHTML=
+    tag(incStr(idea),'tg')+' '+tag(difLbl(idea.dif),'tb')+' '+tag('👶 от '+idea.age+' лет','to');
+  document.getElementById('d-desc').textContent=idea.desc;
+  document.getElementById('d-steps').innerHTML=idea.steps.map((s,i)=>
+    `<div style="display:flex;gap:12px;margin-bottom:10px;align-items:flex-start;">
+      <div class="snum">${i+1}</div>
+      <span style="color:#ddd;font-size:13px;line-height:1.6;">${s}</span>
+    </div>`).join('');
+  document.getElementById('d-risks').innerHTML=idea.risks.map(r=>
+    `<div style="color:#ffbbaa;font-size:13px;margin-bottom:6px;">• ${r}</div>`).join('');
+  document.getElementById('d-example').textContent='"'+idea.ex+'"';
+
+  const done=S.done.includes(idea.id);
+  document.getElementById('d-done-btn').style.display=done?'none':'block';
+  document.getElementById('d-done-msg').style.display=done?'block':'none';
+  document.getElementById('inc-inp').value='';
+  document.getElementById('inc-ok').style.display='none';
+}
+
+function closeDetail(){
+  document.getElementById('t-detail').style.display='none';
+  document.getElementById('t-home').style.display='block';
+  renderFilters(); renderIdeas();
+}
+
+function markDone(){
+  if(!S.idea||S.done.includes(S.idea.id))return;
+  save('done',[...S.done,S.idea.id]);
+  addXp(200); unlock('first_done');
+  document.getElementById('d-done-btn').style.display='none';
+  document.getElementById('d-done-msg').style.display='block';
+}
+
+function addInc(){
+  const v=parseInt(document.getElementById('inc-inp').value);
+  if(isNaN(v)||v<=0)return;
+  const src=S.idea?S.idea.title:'Заработок';
+  const nxt=[...S.income,{amount:v,source:src,date:new Date().toISOString()}];
+  save('income',nxt); addXp(50);
+  const tot=nxt.reduce((a,b)=>a+b.amount,0);
+  if(tot>=10000)unlock('income_10k');
+  if(tot>=50000)unlock('income_50k');
+  renderHeader();
+  document.getElementById('inc-inp').value='';
+  document.getElementById('inc-ok').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+// AI TAB
+// ═══════════════════════════════════════════════════════
+
+let aiExpanded=null;
+
+async function runAI(){
+  const age=document.getElementById('ai-age').value.trim();
+  const city=document.getElementById('ai-city').value.trim();
+  const skills=document.getElementById('ai-skills').value.trim();
+  const hours=document.getElementById('ai-hours').value.trim();
+  const errEl=document.getElementById('ai-err');
+  const btn=document.getElementById('ai-btn');
+  const res=document.getElementById('ai-results');
+
+  if(!age||!skills){errEl.textContent='Заполни возраст и навыки';errEl.style.display='block';return;}
+  errEl.style.display='none';
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Генерирую персональные идеи...';
+  res.innerHTML='';
+  aiExpanded=null;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        system:'Ты эксперт по заработку для подростков в Казахстане. Отвечай ТОЛЬКО валидным JSON-массивом без markdown и без любого другого текста.',
+        messages:[{role:'user',content:`Подростку ${age} лет. Город: ${city||'Казахстан'}. Навыки/интересы: ${skills}. Свободного времени: ${hours||'2–3'} часов/день.\n\nПридумай ровно 6 реальных, легальных, безопасных идей заработка именно для этого человека. Учти казахстанские реалии: Kaspi, Glovo, OLX.kz, Telegram, WhatsApp.\n\nВерни ТОЛЬКО JSON-массив из 6 объектов:\n[{"title":"...","emoji":"1 эмодзи","income":"5,000–15,000₸/день","difficulty":"Легко","timeNeeded":"2–3 часа/день","description":"2–3 предложения под этого человека","firstStep":"Конкретное действие прямо сейчас","warning":"Главный риск","whyFit":"Почему эта идея подходит именно тебе"}]`}]
+      })
+    });
+    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'HTTP '+r.status);}
+    const data=await r.json();
+    const txt=(data.content||[]).map(b=>b.text||'').join('');
+    const clean=txt.replace(/```json|```/g,'').trim();
+    const ideas=JSON.parse(clean);
+    unlock('ai_used');
+    renderAIResults(ideas);
+  }catch(e){
+    errEl.textContent='Ошибка: '+e.message;
+    errEl.style.display='block';
+  }
+  btn.disabled=false;
+  btn.innerHTML='✨ Сгенерировать мои идеи';
+}
+
+function renderAIResults(ideas){
+  const el=document.getElementById('ai-results');
+  el.innerHTML=`<div style="color:#00ff88;font-size:12px;font-weight:800;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;">🎯 ${ideas.length} идей специально для тебя</div>`+
+  ideas.map((r,i)=>`
+    <div class="glass acard" id="ac-${i}" onclick="toggleAI(${i})" style="margin-bottom:11px;">
+      <div style="padding:17px;">
+        <div style="display:flex;gap:13px;align-items:flex-start;">
+          <span style="font-size:30px;line-height:1;flex-shrink:0;">${r.emoji}</span>
+          <div style="flex:1;">
+            <div style="font-weight:800;margin-bottom:7px;font-size:14px;">${r.title}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${tag(r.income,'tg')} ${tag(r.difficulty,'tb')} ${tag(r.timeNeeded,'tp')}
+            </div>
+          </div>
+          <span id="aa-${i}" style="color:#333;font-size:11px;margin-top:3px;flex-shrink:0;">▼</span>
+        </div>
+        <div id="ae-${i}" style="display:none;margin-top:12px;">
+          <p style="color:#bbb;font-size:13px;line-height:1.65;margin:0 0 12px;">${r.description}</p>
+          ${r.whyFit?`<div style="background:rgba(0,136,255,.07);border:1px solid rgba(0,136,255,.19);border-radius:8px;padding:9px 12px;margin-bottom:10px;"><div style="color:#4da6ff;font-size:11px;font-weight:800;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Почему тебе подходит</div><div style="color:#aaccff;font-size:13px;">${r.whyFit}</div></div>`:''}
+          <div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.19);border-radius:8px;padding:9px 12px;margin-bottom:10px;">
+            <div style="color:#00ff88;font-size:11px;font-weight:800;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Первый шаг прямо сейчас</div>
+            <div style="color:#aaffcc;font-size:13px;">${r.firstStep}</div>
+          </div>
+          ${r.warning?`<div style="color:#ff9966;font-size:12px;">⚠️ ${r.warning}</div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleAI(i){
+  const ex=document.getElementById('ae-'+i);
+  const ar=document.getElementById('aa-'+i);
+  const open=ex.style.display!=='none';
+  if(aiExpanded!==null&&aiExpanded!==i){
+    document.getElementById('ae-'+aiExpanded).style.display='none';
+    document.getElementById('aa-'+aiExpanded).textContent='▼';
+  }
+  ex.style.display=open?'none':'block';
+  ar.textContent=open?'▼':'▲';
+  aiExpanded=open?null:i;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════
+
+function renderProgress(){
+  const tot=totInc();
+  const lv=Math.floor(S.xp/200)+1;
+  const stats=[
+    {v:fmt(tot)+'₸',l:'Всего заработано',c:'#00ff88'},
+    {v:S.done.length,l:'Выполнено идей',c:'#0099ff'},
+    {v:S.xp,l:'Всего XP',c:'#ffd700'},
+    {v:lv,l:'Уровень',c:'#ff7755'}
+  ];
+  document.getElementById('stats-g').innerHTML=stats.map(s=>
+    `<div class="glass stcard" style="border-color:${s.c}18;">
+      <div class="stv" style="color:${s.c};">${s.v}</div>
+      <div class="stl">${s.l}</div>
+    </div>`).join('');
+
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()-(6-i));
+    const ds=d.toDateString();
+    return {lb:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()],amt:S.income.filter(e=>new Date(e.date).toDateString()===ds).reduce((a,b)=>a+b.amount,0)};
+  });
+  const maxA=Math.max(...days.map(d=>d.amt),1);
+  document.getElementById('bchart').innerHTML=days.map(d=>
+    `<div class="bwrap">
+      <div class="bar" style="background:${d.amt>0?'linear-gradient(180deg,#00ff88,#0066cc)':'#111127'};height:${(d.amt/maxA)*72+4}px;"></div>
+      <span class="blbl">${d.lb}</span>
+    </div>`).join('');
+
+  const hw=document.getElementById('history-wrap');
+  if(S.income.length===0){
+    hw.innerHTML='<div style="text-align:center;color:#333;padding:20px 0;font-size:14px;">Пока нет записей. Добавь первый заработок!</div>';
+    return;
+  }
+  document.getElementById('history-list').innerHTML=[...S.income].reverse().slice(0,10).map(e=>
+    `<div class="hrow"><span style="color:#777;">${e.source}</span><span style="color:#00ff88;font-weight:700;">+${fmt(e.amount)}₸</span></div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ACHIEVEMENTS
+// ═══════════════════════════════════════════════════════
+
+function renderAchs(){
+  document.getElementById('ach-g').innerHTML=ACHS.map(a=>{
+    const got=S.unlocked.includes(a.id);
+    return `<div class="glass" style="padding:16px;display:flex;gap:14px;align-items:center;opacity:${got?1:.4};border-color:${got?'rgba(255,215,0,.09)':'rgba(34,34,34,.5)'};">
+      <span style="font-size:32px;${got?'':'filter:grayscale(1) brightness(.3)'};">${a.emoji}</span>
+      <div>
+        <div style="font-weight:800;color:${got?'#ffd700':'#444'};margin-bottom:2px;">${a.title}</div>
+        <div style="font-size:12px;color:#555;">${a.desc}</div>
+        <div style="font-size:11px;color:${got?'#00ff88':'#333'};margin-top:4px;">+${a.xp} XP</div>
+      </div>
+      ${got?'<div style="margin-left:auto;font-size:20px;color:#ffd700;">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// COMMUNITY
+// ═══════════════════════════════════════════════════════
+
+function renderCommunity(){
+  document.getElementById('stories-g').innerHTML=STORIES.map(s=>
+    `<div class="glass" style="padding:17px;margin-bottom:11px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+        <div><span style="font-weight:800;font-size:14px;">${s.n}</span><span style="color:#444;font-size:12px;margin-left:8px;">${s.c}</span></div>
+        <span style="font-size:24px;">${s.em}</span>
+      </div>
+      <p style="color:#bbb;font-size:13px;line-height:1.65;margin:0 0 11px;font-style:italic;">"${s.t}"</p>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        ${tag(fmt(s.e)+'₸ за '+s.d+' дней','tg')} ${tag(s.i,'tb')}
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+
+renderHeader();
+renderXpBar();
+renderCommunity();
+renderAchs();
+go('home');
+</script>
+</body>
+</html>
